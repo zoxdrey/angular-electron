@@ -1,7 +1,9 @@
-import { app, BrowserWindow, screen } from 'electron';
+import {app, BrowserWindow, screen} from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as url from 'url';
+import * as express from 'express';
+import * as cors from 'cors';
 
 // Initialize remote module
 require('@electron/remote/main').initialize();
@@ -9,9 +11,15 @@ require('@electron/remote/main').initialize();
 let win: BrowserWindow = null;
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
+const exapp = express()
+exapp.use(cors())
 
 function createWindow(): BrowserWindow {
+  exapp.get('/test', function (req, res) {
+    res.send('Hello World')
+  })
 
+  exapp.listen(3000);
   const electronScreen = screen;
   const size = electronScreen.getPrimaryDisplay().workAreaSize;
 
@@ -25,7 +33,7 @@ function createWindow(): BrowserWindow {
       nodeIntegration: true,
       allowRunningInsecureContent: (serve) ? true : false,
       contextIsolation: false,  // false if you want to run e2e test with Spectron
-      enableRemoteModule : true // true if you want to run e2e test with Spectron or use remote module in renderer context (ie. Angular)
+      enableRemoteModule: true // true if you want to run e2e test with Spectron or use remote module in renderer context (ie. Angular)
     },
   });
 
@@ -41,7 +49,7 @@ function createWindow(): BrowserWindow {
     let pathIndex = './index.html';
 
     if (fs.existsSync(path.join(__dirname, '../dist/index.html'))) {
-       // Path when running electron in local folder
+      // Path when running electron in local folder
       pathIndex = '../dist/index.html';
     }
 
